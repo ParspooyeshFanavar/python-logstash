@@ -12,12 +12,14 @@ test_logger = logging.getLogger('python-logstash-logger')
 test_logger.setLevel(logging.INFO)
 
 # add the handler
-test_logger.addHandler(logstash.AMQPLogstashHandler(version=1,
-                                                    host=host,
-                                                    durable=True,
-                                                    username=username,
-                                                    password=password,
-                                                    exchange=exchange))
+test_logger.addHandler(logstash.AMQPLogstashHandler(
+    version=1,
+    host=host,
+    durable=True,
+    username=username,
+    password=password,
+    exchange=exchange,
+))
 
 # log
 test_logger.error('python-logstash: test logstash error message.')

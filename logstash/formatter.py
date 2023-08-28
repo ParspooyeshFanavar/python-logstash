@@ -1,8 +1,8 @@
-import traceback
 import logging
 import socket
-import sys
+import traceback
 from datetime import datetime
+
 try:
     import json
 except ImportError:
@@ -66,11 +66,11 @@ class LogstashFormatterBase(logging.Formatter):
 
     @classmethod
     def format_source(cls, message_type, host, path):
-        return "%s://%s/%s" % (message_type, host, path)
+        return f"{message_type}://{host}/{path}"
 
     @classmethod
-    def format_timestamp(cls, time):
-        tstamp = datetime.utcfromtimestamp(time)
+    def format_timestamp(cls, timestamp: int):
+        tstamp = datetime.utcfromtimestamp(timestamp)
         return tstamp.strftime("%Y-%m-%dT%H:%M:%S") + ".%03d" % (tstamp.microsecond / 1000) + "Z"
 
     @classmethod
@@ -92,8 +92,11 @@ class LogstashFormatterVersion0(LogstashFormatterBase):
         message = {
             '@timestamp': self.format_timestamp(record.created),
             '@message': record.getMessage(),
-            '@source': self.format_source(self.message_type, self.host,
-                                          record.pathname),
+            '@source': self.format_source(
+                self.message_type,
+                self.host,
+                record.pathname,
+            ),
             '@source_host': self.host,
             '@source_path': record.pathname,
             '@tags': self.tags,

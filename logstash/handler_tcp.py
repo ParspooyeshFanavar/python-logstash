@@ -1,10 +1,11 @@
-from logging.handlers import DatagramHandler, SocketHandler
-from logstash import formatter
+from logging.handlers import DatagramHandler
+
+from . import formatter
 
 
 # Derive from object to force a new-style class and thus allow super() to work
 # on Python 2.6
-class TCPLogstashHandler(SocketHandler, object):
+class TCPLogstashHandler(DatagramHandler):
     """Python logging handler for Logstash. Sends events over TCP.
     :param host: The host of the logstash server.
     :param port: The port of the logstash server (default 5959).
@@ -14,8 +15,16 @@ class TCPLogstashHandler(SocketHandler, object):
     :param tags: list of tags for a logger (default is None).
     """
 
-    def __init__(self, host, port=5959, message_type='logstash', tags=None, fqdn=False, version=0):
-        super(TCPLogstashHandler, self).__init__(host, port)
+    def __init__(
+        self,
+        host,
+        port=5959,
+        message_type='logstash',
+        tags=None,
+        fqdn=False,
+        version=1,
+    ):
+        DatagramHandler.__init__(self, host, port)
         if version == 1:
             self.formatter = formatter.LogstashFormatterVersion1(message_type, tags, fqdn)
         else:

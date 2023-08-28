@@ -1,17 +1,11 @@
-import json
-try:
-    from urllib import urlencode
-except ImportError:
-    from urllib.parse import urlencode
-
-from logging import Filter
 from logging.handlers import SocketHandler
 
 import pika
+
 from logstash import formatter
 
 
-class AMQPLogstashHandler(SocketHandler, object):
+class AMQPLogstashHandler(SocketHandler):
     """AMQP Log Format handler
 
     :param host: AMQP host (default 'localhost')
@@ -43,13 +37,13 @@ class AMQPLogstashHandler(SocketHandler, object):
         record.name will be passed as `logger` parameter.
     """
 
-    def __init__(self, host='localhost', port=5672, username='guest',
-                 password='guest', exchange='logstash', exchange_type='fanout',
-                 virtual_host='/', message_type='logstash', tags=None,
-                 durable=False, passive=False, version=0, extra_fields=True,
-                 fqdn=False, facility=None, exchange_routing_key=''):
-
-
+    def __init__(
+        self, host='localhost', port=5672, username='guest',
+        password='guest', exchange='logstash', exchange_type='fanout',
+        virtual_host='/', message_type='logstash', tags=None,
+        durable=False, passive=False, version=1, extra_fields=True,
+        fqdn=False, facility=None, exchange_routing_key='',
+    ):
         # AMQP parameters
         self.host = host
         self.port = port
@@ -92,7 +86,7 @@ class AMQPLogstashHandler(SocketHandler, object):
         return self.formatter.format(record)
 
 
-class PikaSocket(object):
+class PikaSocket:
 
     def __init__(self, host, port, username, password, virtual_host, exchange,
                 routing_key, durable, passive, exchange_type):
