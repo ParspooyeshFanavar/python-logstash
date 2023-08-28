@@ -1,13 +1,22 @@
 
-from logstash.formatter import LogstashFormatterVersion0, LogstashFormatterVersion1
+from .client import LogstashClient
+from .formatter import LogstashFormatterVersion0, LogstashFormatterVersion1
+from .handler_tcp import TCPLogstashHandler
+from .handler_udp import LogstashHandler, UDPLogstashHandler
 
-from logstash.handler_tcp import TCPLogstashHandler
-from logstash.handler_udp import UDPLogstashHandler, LogstashHandler
 try:
     from logstash.handler_amqp import AMQPLogstashHandler
-except:
+except ImportError:
    # you need to install AMQP support to enable this handler.
    pass
- 
 
 
+__all__ = [
+    "LogstashFormatterVersion0",
+    "LogstashFormatterVersion1",
+    "TCPLogstashHandler",
+    "UDPLogstashHandler",
+    "LogstashHandler",
+    "AMQPLogstashHandler",
+    "LogstashClient",
+]
