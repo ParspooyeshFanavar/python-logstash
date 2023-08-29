@@ -2,6 +2,7 @@ import logging
 import socket
 import traceback
 from datetime import datetime
+import sys
 
 try:
     import json
@@ -31,7 +32,16 @@ class LogstashFormatterBase(logging.Formatter):
             'auth_token', 'password', 'stack_info')
 
         if sys.version_info < (3, 0):
-            easy_types = (basestring, bool, dict, float, int, long, list, type(None))
+            easy_types = (
+                basestring,  # noqa: F821
+                bool,
+                dict,
+                float,
+                int,
+                long,  # noqa: F821
+                list,
+                type(None),
+            )
         else:
             easy_types = (str, bool, dict, float, int, list, type(None))
 
@@ -71,7 +81,8 @@ class LogstashFormatterBase(logging.Formatter):
     @classmethod
     def format_timestamp(cls, timestamp: int):
         tstamp = datetime.utcfromtimestamp(timestamp)
-        return tstamp.strftime("%Y-%m-%dT%H:%M:%S") + ".%03d" % (tstamp.microsecond / 1000) + "Z"
+        return tstamp.strftime("%Y-%m-%dT%H:%M:%S") + \
+            ".%03d" % (tstamp.microsecond / 1000) + "Z"
 
     @classmethod
     def format_exception(cls, exc_info):
