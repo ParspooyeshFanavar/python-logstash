@@ -12,7 +12,13 @@ if typing.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 class LogstashClient(DatagramClient):
-    def __init__(self, host, port, tags=None, fqdn=False):
+    def __init__(
+        self,
+        host,
+        port,
+        tags=None,
+        fqdn=False,
+    ):
         self.tags = tags
         if fqdn:
             self.host = socket.getfqdn()
@@ -21,11 +27,10 @@ class LogstashClient(DatagramClient):
         DatagramClient.__init__(self, host=host, port=port)
 
     def sendDict(self, message: "dict[str, Any]"):
-        logger.info(f"--- LogstashClient: sendDict: {message}")
         self.send(json.dumps(message, default=str).encode("utf-8"))
 
-    @classmethod
-    def format_datetime(cls, dt: datetime):
+    def current_timestamp(self):
+        dt = datetime.utcnow().replace(tzinfo=None)
         return dt.strftime("%Y-%m-%dT%H:%M:%S") + ".%03d" % (dt.microsecond / 1000) + "Z"
 
     def sendDjangoRequest(self, req, **kwargs):
@@ -43,7 +48,7 @@ class LogstashClient(DatagramClient):
 
         # keys should not start with '@' except timestamp and version
         message = {
-            '@timestamp': self.format_datetime(datetime.now()),
+            '@timestamp': self.current_timestamp(),
             '@version': '1',
             "message": f"{req.method} {req.path}",
             'host': host_dict,
