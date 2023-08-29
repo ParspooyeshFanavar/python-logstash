@@ -27,11 +27,20 @@ class LogstashClient(DatagramClient):
         DatagramClient.__init__(self, host=host, port=port)
 
     def sendDict(self, message: "dict[str, Any]"):
-        self.send(json.dumps(message, default=str).encode("utf-8"))
+        message["@timestamp"] = self.current_timestamp()
+        message["@version"] = "1"
+        if "tags" not in message:
+            message["tags"] = self.tags
+        if "type" not in message:
+            message["type"] = "logstash"
+        self.send(
+            json.dumps(message, default=str).encode("utf-8"),
+        )
 
     def current_timestamp(self):
         dt = datetime.utcnow().replace(tzinfo=None)
-        return dt.strftime("%Y-%m-%dT%H:%M:%S") + ".%03d" % (dt.microsecond / 1000) + "Z"
+        return dt.strftime("%Y-%m-%dT%H:%M:%S") + \
+            ".%03d" % (dt.microsecond / 1000) + "Z"
 
     def sendDjangoRequest(self, req, **kwargs):
         from ipware import get_client_ip
@@ -46,17 +55,13 @@ class LogstashClient(DatagramClient):
         if len(host_parts) > 1:
             host_dict["port"] = host_parts[1]
 
-        # keys should not start with '@' except timestamp and version
+        # keys should not start with "@" except timestamp and version
         message = {
-            '@timestamp': self.current_timestamp(),
-            '@version': '1',
             "message": f"{req.method} {req.path}",
-            'host': host_dict,
+            "host": host_dict,
             "path": req.path,
-            'tags': self.tags,
-            'type': "logstash",
-            'level': "INFO",
-            'logger_name': "django.requests",
+            "level": "INFO",
+            "logger_name": "django.requests",
             # extra fields:
             "username": req.user.username,
             "remote_ip": remote_ip,
