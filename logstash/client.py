@@ -16,23 +16,26 @@ class LogstashClient(DatagramClient):
         self,
         host,
         port,
+        message_type='log',
         tags=None,
         fqdn=False,
     ):
-        self.tags = tags
+        self.tags = tags or []
         if fqdn:
             self.host = socket.getfqdn()
         else:
             self.host = socket.gethostname()
+        self.message_type = message_type
         DatagramClient.__init__(self, host=host, port=port)
 
     def sendDict(self, message: "dict[str, Any]"):
         message["@timestamp"] = self._currentTimestamp()
         message["@version"] = "1"
+        message["source"] = "logstash"
         if "tags" not in message:
             message["tags"] = self.tags
         if "type" not in message:
-            message["type"] = "logstash"
+            message["type"] = self.message_type
         self.send(
             json.dumps(message, default=str).encode("utf-8"),
         )

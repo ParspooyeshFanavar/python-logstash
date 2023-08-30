@@ -28,5 +28,5 @@ test_logger.warning('python-logstash: test logstash warning message.')
 
 try:
     1/0
-except:
+except Exception:
     test_logger.exception('python-logstash: test logstash exception with stack trace')
