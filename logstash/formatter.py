@@ -149,6 +149,7 @@ class LogstashFormatterVersion1(LogstashFormatterBase):
 
             # Extra Fields
             "level": record.levelname,
+            "level_no": record.levelno,
             "logger_name": record.name,
         }
 
