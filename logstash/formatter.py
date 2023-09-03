@@ -60,7 +60,6 @@ class LogstashFormatterBase(logging.Formatter):
 
     def get_debug_fields(self, record):
         fields = {
-            "stack_trace": self.format_exception(record.exc_info),
             "lineno": record.lineno,
             "process": record.process,
             "thread_name": record.threadName,
@@ -126,6 +125,7 @@ class LogstashFormatterVersion0(LogstashFormatterBase):
         # If exception, add debug info
         if record.exc_info:
             message["@fields"].update(self.get_debug_fields(record))
+            message["@fields"]["stack_trace"] = self.format_exception(record.exc_info)
 
         return self.serialize(message)
 
@@ -164,5 +164,6 @@ class LogstashFormatterVersion1(LogstashFormatterBase):
         # If exception, add debug info
         if record.exc_info:
             message["debug"] = json.dumps(self.get_debug_fields(record))
+            message["stack_trace"] = self.format_exception(record.exc_info)
 
         return self.serialize(message)
