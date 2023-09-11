@@ -12,6 +12,8 @@ if typing.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 class LogstashClient(DatagramClient):
+    MAX_DATA_SIZE = 65507
+    
     def __init__(
         self,
         host,
@@ -36,9 +38,15 @@ class LogstashClient(DatagramClient):
             message["tags"] = self.tags
         if "type" not in message:
             message["type"] = self.message_type
-        self.send(
-            json.dumps(message, default=str).encode("utf-8"),
-        )
+        msg_json = json.dumps(message, default=str).encode("utf-8")
+        if len(msg_json) > self.MAX_DATA_SIZE:
+            print(f"---------- LogstashClient: sendDict: skipped sending message with length {len(msg_json)}")
+            return
+        try:
+            self.send(msg_json)
+        except Exception as e:
+            print(f"---------- LogstashClient: sendDict: exception trying to send {e}")
+
 
     def _currentTimestamp(self):
         dt = datetime.utcnow().replace(tzinfo=None)
